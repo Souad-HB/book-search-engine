@@ -1,39 +1,49 @@
-import type { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { GraphQLError } from 'graphql';
-import dotenv from 'dotenv';
+import jwt from "jsonwebtoken";
+import { GraphQLError } from "graphql";
+import dotenv from "dotenv";
 dotenv.config();
 
-interface JwtPayload {
-  _id: unknown;
-  username: string;
-  email: string,
-}
+// interface JwtPayload {
+//   _id: unknown;
+//   username: string;
+//   email: string;
+// }
 
-export const authenticateToken = ({req}: any) => {
+export const authenticateToken = ({ req }: any) => {
+  // we allow the token to be sent either through the body, the headers authorization or through the query
+  let token = req.body.token || req.query.token || req.headers.authorization;
+
+  // if the token is in the authorization header then extract it
   const authHeader = req.headers.authorization;
-
   if (authHeader) {
-    const token = authHeader.split(' ')[1];
-
-    const secretKey = process.env.JWT_SECRET_KEY || '';
-
-    jwt.verify(token, secretKey, (err, user) => {
-      if (err) {
-        return res.sendStatus(403); // Forbidden
-      }
-
-      req.user = user as JwtPayload;
-      return next();
-    });
-  } else {
-    res.sendStatus(401); // Unauthorized
+    token = authHeader.split(" ")[1];
   }
+  // if the token isnt valid then return the req
+  if (!token) {
+    return req;
+  }
+
+  // verify the token
+  const secretKey = process.env.JWT_SECRET_KEY || "";
+  try {
+    const { data }: any = jwt.verify(token, secretKey, { maxAge: "2h" });
+    req.user = data;
+  } catch (err) {
+    console.log("Invalid Token");
+  }
+  return req;
 };
 
 export const signToken = (username: string, email: string, _id: unknown) => {
   const payload = { username, email, _id };
-  const secretKey = process.env.JWT_SECRET_KEY || '';
+  const secretKey = process.env.JWT_SECRET_KEY || "";
 
-  return jwt.sign(payload, secretKey, { expiresIn: '1h' });
+  return jwt.sign({ data: payload }, secretKey, { expiresIn: "1h" });
 };
+
+export class AuthenticationError extends GraphQLError {
+  constructor(message: string) {
+    super(message, undefined, undefined, undefined, ["UNAUTHENTICATED"]);
+    Object.defineProperty(this, "name", { value: "AuthenticationError" });
+  }
+}
