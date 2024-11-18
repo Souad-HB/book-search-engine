@@ -21,7 +21,7 @@ export const authenticateToken = ({ req }: any) => {
   // if the token isnt valid then return the req
   if (!token) {
     return req;
-  }
+  };
 
   // verify the token
   const secretKey = process.env.JWT_SECRET_KEY || "";
