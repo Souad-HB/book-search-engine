@@ -23,6 +23,7 @@ interface AddUserArgs {
     email: String;
     username: String;
     password: String;
+    savedBooks: [Book];
   };
 }
 interface AddBookArgs {

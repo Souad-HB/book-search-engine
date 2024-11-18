@@ -27,6 +27,7 @@ input UserInput {
     email: String!
     username: String!
     password: String!
+    savedBooks: [BookInput]
 }
 
 input BookInput {
