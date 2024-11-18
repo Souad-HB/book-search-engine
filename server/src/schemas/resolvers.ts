@@ -1,17 +1,23 @@
 import { User } from "../models/index.js";
-import {BookSchema}  from "../models/index.js";
-import { AuthenticationError, signToken } from "../services/auth.js";
+import { signToken, AuthenticationError } from "../services/auth.js";
+
+interface Book {
+  bookId: String;
+  authors: String[];
+  description: String;
+  title: String;
+  image: String;
+  link: String;
+}
 interface User {
-    _id: String;
-    username: String;
-    email: String;
-    password: String;
-    bookCount: String;
-    savedBooks: [BookSchema];
+  _id: String;
+  username: String;
+  email: String;
+  password: String;
+  bookCount: String;
+  savedBooks: [Book];
 }
-interface Context {
-  user?: User;
-}
+
 interface AddUserArgs {
   userInput: {
     email: String;
@@ -19,9 +25,9 @@ interface AddUserArgs {
     password: String;
   };
 }
-interface BookInput {
+interface AddBookArgs {
   bookInput: {
-    authors: String;
+    authors: String[];
     description: String;
     title: String;
     bookId: String;
@@ -33,6 +39,10 @@ interface RemoveBookArgs {
   bookId: String;
 }
 
+interface Context {
+  user?: User;
+}
+
 const resolvers = {
   Query: {
     me: async (
@@ -40,11 +50,11 @@ const resolvers = {
       _args: unknown,
       context: Context
     ): Promise<User | null> => {
-      console.log(context);
+      console.log(context.user); // debugging
       if (context.user) {
         return await User.findOne({ _id: context.user._id });
       }
-      throw new AuthenticationError("Not Authenticated");
+      throw AuthenticationError;
     },
   },
   Mutation: {
@@ -74,7 +84,7 @@ const resolvers = {
     // save  a book
     saveBook: async (
       _parent: unknown,
-      bookInput: BookInput,
+      { bookInput }: AddBookArgs,
       context: Context
     ): Promise<User | null> => {
       if (context.user) {

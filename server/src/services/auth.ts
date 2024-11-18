@@ -3,28 +3,22 @@ import { GraphQLError } from "graphql";
 import dotenv from "dotenv";
 dotenv.config();
 
-// interface JwtPayload {
-//   _id: unknown;
-//   username: string;
-//   email: string;
-// }
-
 export const authenticateToken = ({ req }: any) => {
   // we allow the token to be sent either through the body, the headers authorization or through the query
   let token = req.body.token || req.query.token || req.headers.authorization;
 
   // if the token is in the authorization header then extract it
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    token = authHeader.split(" ")[1];
+
+  if (req.headers.authorization) {
+    token = token.split(" ").pop().trim();
   }
   // if the token isnt valid then return the req
   if (!token) {
     return req;
-  };
+  }
 
   // verify the token
-  const secretKey = process.env.JWT_SECRET_KEY || "";
+  const secretKey = process.env.JWT_SECRET_KEY || " ";
   try {
     const { data }: any = jwt.verify(token, secretKey, { maxAge: "2h" });
     req.user = data;
