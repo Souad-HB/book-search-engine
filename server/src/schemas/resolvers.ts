@@ -14,7 +14,7 @@ interface User {
   username: String;
   email: String;
   password: String;
-  bookCount: String;
+  bookCount: Number;
   savedBooks: [Book];
 }
 
