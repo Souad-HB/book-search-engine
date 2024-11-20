@@ -111,4 +111,4 @@ For any questions please reach out by email, and feel free to check my github:
 
 ## **License**
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
+This project is licensed under the [Apache License](https://opensource.org/licenses/Apache-2.0).
